@@ -33,6 +33,7 @@ vtkButtonSource.cxx
 vtkCellCenters.cxx
 vtkCellDataToPointData.cxx
 vtkCellDerivatives.cxx
+myVTKCellDerivatives.cxx
 vtkCellLocatorInterpolatedVelocityField.cxx
 vtkCellQuality.cxx
 vtkCleanPolyData.cxx
@@ -42,6 +43,7 @@ vtkClipDataSet.cxx
 vtkClipHyperOctree.cxx
 vtkClipPolyData.cxx
 vtkClipVolume.cxx
+vtkCollisionDetectionFilter.cxx
 vtkCoincidentPoints.cxx
 vtkCompositeDataGeometryFilter.cxx
 vtkCompositeDataProbeFilter.cxx

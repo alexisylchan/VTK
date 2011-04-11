@@ -25,7 +25,14 @@
 #include "vtkPointData.h"
 #include "vtkTensor.h"
 
+#include "jama_eig.h"
+
 #include <math.h>
+
+typedef TNT::Array1D<double> ArrayType;
+typedef TNT::Array2D<double> MatrixType;
+typedef JAMA::Eigenvalue<double> SolverType;
+
 
 vtkStandardNewMacro(myVTKCellDerivatives);
 
@@ -67,6 +74,7 @@ int myVTKCellDerivatives::RequestData(
   vtkDoubleArray *outVorticity=NULL;
   vtkDoubleArray *outTensors=NULL;
   vtkDoubleArray *outQ=NULL;
+  vtkDoubleArray *outLambda2=NULL;
   vtkIdType numCells=input->GetNumberOfCells();
   int computeScalarDerivs=1, computeVectorDerivs=1, computeVorticity=1, subId;
 
@@ -137,7 +145,11 @@ int myVTKCellDerivatives::RequestData(
       }
     else if ( this->TensorMode == VTK_TENSOR_MODE_COMPUTE_LAMBDA2 )
       {
-      outTensors->SetName("Q");
+      outTensors->SetName("Lambda2Tensors");
+	  outLambda2 = vtkDoubleArray::New();
+	  outLambda2->SetNumberOfComponents(1);
+	  outLambda2->SetNumberOfTuples(numCells);
+	  outLambda2->SetName("Lambda2");
       }
     }
   else
@@ -245,16 +257,43 @@ int myVTKCellDerivatives::RequestData(
 
         else if(this->TensorMode == VTK_TENSOR_MODE_COMPUTE_LAMBDA2)// This is not actually Lambda2, but the tensor used for calculating lambda2
           {
+		  MatrixType eigmatrix(3,3);
+
           tens->SetComponent(0,0, derivs[0]*derivs[0] +  0.25*derivs[1]*derivs[1] + 0.25*derivs[3]*derivs[3] + 0.25*derivs[2]*derivs[2] + 0.25*derivs[6]*derivs[6]);
+		  eigmatrix[0][0] = tens->GetComponent(0,0);
 		  tens->SetComponent(0,1, 0.5*derivs[0]*derivs[1] + 0.5*derivs[4]*derivs[1] + 0.25*derivs[2]*derivs[5] + 0.25*derivs[6]*derivs[7]);
-          tens->SetComponent(0,2, 0.5*derivs[0]*derivs[2] + 0.25*derivs[1]*derivs[5] + 0.25*derivs[3]*derivs[7] + 0.5*derivs[8]*derivs[1]);
-          tens->SetComponent(1,0, 0.5*derivs[0]*derivs[1] + 0.5*derivs[4]*derivs[1] + 0.25*derivs[5]*derivs[2] + 0.25*derivs[7]*derivs[6]);
-          tens->SetComponent(1,1, 0.25*derivs[1]*derivs[1] + 0.25*derivs[3]*derivs[3] + 1*derivs[4]*derivs[4] + 0.25*derivs[5]*derivs[5] + 0.25*derivs[7]*derivs[7]);
-          tens->SetComponent(1,2, 0.25*derivs[1]*derivs[2] + 0.25*derivs[3]*derivs[6] + 0.5*derivs[4]*derivs[5] + 0.5*derivs[8]*derivs[5]);
-          tens->SetComponent(2,0, 0.5*derivs[1]*derivs[2] + 0.25*derivs[5]*derivs[1] + 0.25*derivs[7]*derivs[5] + 0.5*derivs[8]*derivs[2]);
-          tens->SetComponent(2,1, 0.25*derivs[2]*derivs[1] + 0.25*derivs[6]*derivs[5] + 0.5*derivs[4]*derivs[5] + 0.5*derivs[8]*derivs[5]);
-          tens->SetComponent(2,2, 0.25*derivs[2]*derivs[2] + 0.25*derivs[6]*derivs[6] + 0.25*derivs[5]*derivs[5] + 0.25*derivs[7]*derivs[7] + 1*derivs[8]*derivs[8]);
-          
+          eigmatrix[0][1] = tens->GetComponent(0,1);
+		  tens->SetComponent(0,2, 0.5*derivs[0]*derivs[2] + 0.25*derivs[1]*derivs[5] + 0.25*derivs[3]*derivs[7] + 0.5*derivs[8]*derivs[1]);
+          eigmatrix[0][2] = tens->GetComponent(0,2);
+		  tens->SetComponent(1,0, 0.5*derivs[0]*derivs[1] + 0.5*derivs[4]*derivs[1] + 0.25*derivs[5]*derivs[2] + 0.25*derivs[7]*derivs[6]);
+          eigmatrix[1][0] = tens->GetComponent(1,0);
+		  tens->SetComponent(1,1, 0.25*derivs[1]*derivs[1] + 0.25*derivs[3]*derivs[3] + 1*derivs[4]*derivs[4] + 0.25*derivs[5]*derivs[5] + 0.25*derivs[7]*derivs[7]);
+          eigmatrix[1][1] = tens->GetComponent(1,1);
+		  tens->SetComponent(1,2, 0.25*derivs[1]*derivs[2] + 0.25*derivs[3]*derivs[6] + 0.5*derivs[4]*derivs[5] + 0.5*derivs[8]*derivs[5]);
+          eigmatrix[1][2] = tens->GetComponent(1,2);
+		  tens->SetComponent(2,0, 0.5*derivs[1]*derivs[2] + 0.25*derivs[5]*derivs[1] + 0.25*derivs[7]*derivs[5] + 0.5*derivs[8]*derivs[2]);
+          eigmatrix[2][0] = tens->GetComponent(2,0);
+		  tens->SetComponent(2,1, 0.25*derivs[2]*derivs[1] + 0.25*derivs[6]*derivs[5] + 0.5*derivs[4]*derivs[5] + 0.5*derivs[8]*derivs[5]);
+          eigmatrix[2][1] = tens->GetComponent(2,1);
+		  tens->SetComponent(2,2, 0.25*derivs[2]*derivs[2] + 0.25*derivs[6]*derivs[6] + 0.25*derivs[5]*derivs[5] + 0.25*derivs[7]*derivs[7] + 1*derivs[8]*derivs[8]);
+          eigmatrix[2][2] = tens->GetComponent(2,2);
+		  
+		  //Compute Eigenvalue?
+		  ArrayType realeigvalue,ieigvalue;
+		  SolverType eigsolver(eigmatrix);
+		  eigsolver.getRealEigenvalues(realeigvalue);
+		  eigsolver.getImagEigenvalues(ieigvalue);
+		  double pot_lambda2[1];
+		  for (int i = 0; i< realeigvalue.dim();i++)
+		  {
+			  if (i == 0)
+				  pot_lambda2[0] = realeigvalue[i];
+			  else if (realeigvalue[i] > pot_lambda2[0])
+				  pot_lambda2[0] = realeigvalue[i];
+		  }
+		  outLambda2->SetTuple(cellId,pot_lambda2);
+
+		  // End Compute Eigenvalue
           outTensors->InsertTuple(cellId, tens->T);
           }
 
@@ -301,6 +340,11 @@ int myVTKCellDerivatives::RequestData(
   {
 	  outCD->SetScalars(outQ);
 	  outQ->Delete();
+  }
+  if (outLambda2)
+  {
+	  outCD->SetScalars(outLambda2);
+	  outLambda2->Delete();
   }
 
   return 1;

@@ -359,6 +359,7 @@ public:
     HoverEvent,
     LoadStateEvent,
     SaveStateEvent,
+    StateFileClosedEvent,
     StateChangedEvent,
     WindowMakeCurrentEvent,
     WindowIsCurrentEvent,

@@ -38,6 +38,8 @@
 // .SECTION See Also
 // vtkVectorNorm
 
+
+
 #ifndef __myVTKCellDerivatives_h
 #define __myVTKCellDerivatives_h
 

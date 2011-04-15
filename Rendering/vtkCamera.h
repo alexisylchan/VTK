@@ -251,6 +251,14 @@ public:
   vtkSetMacro(EyeAngle,double);
   vtkGetMacro(EyeAngle,double);
 
+  
+  vtkSetMacro(EyeOffset,double);
+  vtkGetMacro(EyeOffset,double);
+  vtkSetMacro(ScaleFactor,double);
+  vtkGetMacro(ScaleFactor,double);
+
+
+
   // Description:
   // Set the size of the cameras lens in world coordinates. This is only
   // used when the renderer is doing focal depth rendering. When that is
@@ -520,6 +528,8 @@ protected:
   double ViewAngle;
   double ClippingRange[2];
   double EyeAngle;
+  double EyeOffset;
+  double ScaleFactor;
   int    ParallelProjection;
   double ParallelScale;
   int    Stereo;
@@ -562,9 +572,6 @@ protected:
   double O2Left;
   double O2Top;
   double O2Bottom;
-  double EyeOffset;
-  double ScaleFactor;
-
   // temp
   vtkMatrix4x4 *eyePosMat;
   vtkMatrix4x4 *negEyePosMat;

@@ -55,6 +55,11 @@
 
 #define VTK_NO_Q 0
 #define VTK_COMPUTE_Q 1
+ 
+#include "jama_eig.h"
+typedef TNT::Array1D<double> ArrayType;
+typedef TNT::Array2D<double> MatrixType;
+typedef JAMA::Eigenvalue<double> SolverType;
 
 class  VTK_GRAPHICS_EXPORT myVTKCellDerivatives : public vtkDataSetAlgorithm 
 {
@@ -121,7 +126,8 @@ protected:
   int ComputeQ;
 private:
   myVTKCellDerivatives(const myVTKCellDerivatives&);  // Not implemented.
-  void operator=(const myVTKCellDerivatives&);  // Not implemented.
+  void operator=(const myVTKCellDerivatives&);  // Not implemented
+  ArrayType getLambda2(ArrayType realeigvalue); 
 };
 
 #endif

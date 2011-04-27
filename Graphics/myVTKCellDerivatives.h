@@ -57,6 +57,12 @@
 
 #define VTK_NO_Q 0
 #define VTK_COMPUTE_Q 1
+
+#define VTK_NO_CURVATURE_SJ 0
+#define VTK_CURVATURE_SJ 1
+ 
+#define VTK_NO_CURVATURE_HO 0
+#define VTK_CURVATURE_HO 1
  
 #include "jama_eig.h"
 typedef TNT::Array1D<double> ArrayType;
@@ -85,6 +91,10 @@ public:
   //Set whether to compute the Q Criteria when VectorMode is set to Compute Gradient.
   vtkSetMacro(ComputeQ,int);
   vtkGetMacro(ComputeQ,int);
+  vtkSetMacro(ComputeCurvatureSJ,int);
+  vtkGetMacro(ComputeCurvatureSJ,int);
+  vtkSetMacro(ComputeCurvatureHO,int);
+  vtkGetMacro(ComputeCurvatureHO,int);
   void SetVectorModeToPassVectors() 
     {this->SetVectorMode(VTK_VECTOR_MODE_PASS_VECTORS);};
   void SetVectorModeToComputeGradient() 
@@ -95,6 +105,14 @@ public:
   { this->SetComputeQ(VTK_COMPUTE_Q);};
   void UnsetComputeQ()
   { this->SetComputeQ(VTK_NO_Q);};
+  void SetComputeCurvatureSJ()
+  { this->SetComputeCurvatureSJ(VTK_CURVATURE_SJ);};
+  void UnsetComputeCurvatureSJ()
+  { this->SetComputeCurvatureSJ(VTK_NO_CURVATURE_SJ);};
+  void SetComputeCurvatureHO()
+  { this->SetComputeCurvatureHO(VTK_CURVATURE_HO);};
+  void UnsetComputeCurvatureHO()
+  { this->SetComputeCurvatureHO(VTK_NO_CURVATURE_HO);};
 
   const char *GetVectorModeAsString();
 
@@ -126,10 +144,13 @@ protected:
   int VectorMode;
   int TensorMode;
   int ComputeQ;
+  int ComputeCurvatureSJ;
+  int ComputeCurvatureHO;
 private:
   myVTKCellDerivatives(const myVTKCellDerivatives&);  // Not implemented.
   void operator=(const myVTKCellDerivatives&);  // Not implemented
   ArrayType getLambda2(ArrayType realeigvalue); 
+  double getMedianEigvalue(ArrayType realeigvalue, ArrayType ieigvalue);
 };
 
 #endif

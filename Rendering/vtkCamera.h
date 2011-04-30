@@ -465,6 +465,12 @@ public:
   // \pre not_this: source!=this
   void DeepCopy(vtkCamera *source);
 
+  // Description:
+  // This method is used to set the transfromation matrix from Display
+  // Surface coordinates wrt the Room Base coordinates
+  void SetSurface2Base( vtkMatrix4x4 *head );
+  vtkMatrix4x4* GetSurface2Base();
+
 protected:
   vtkCamera();
   ~vtkCamera();
@@ -507,11 +513,6 @@ protected:
   vtkMatrix4x4* SetTranslation( vtkMatrix4x4 mat );
 
   void ComputeCameraLightTransform();
-
-  // Description:
-  // This method is used to set the transfromation matrix from Display
-  // Surface coordinates wrt the Room Base coordinates
-  void SetSurface2Base( vtkMatrix4x4 *head );
 
   // Description:
   // Copy the ivars. Do nothing for the matrices.

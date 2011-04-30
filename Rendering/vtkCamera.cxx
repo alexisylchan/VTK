@@ -971,7 +971,13 @@ void vtkCamera::SetSurface2Base( vtkMatrix4x4 *surfaceRot )
   this->Surface2Base->SetMatrix( surfaceRot );
   //  this->Surface2Base->Inverse();
 }
-
+//------------------------------------------------------------------HeadTracked
+vtkMatrix4x4 * vtkCamera::GetSurface2Base(  )
+{
+  // Invert the surfaceRot matrix to get Surface2Base
+  return this->Surface2Base->GetMatrix();
+  //  this->Surface2Base->Inverse();
+}
 
 //----------------------------------------------------------------------------
 // Compute the projection transform matrix. This is used in converting

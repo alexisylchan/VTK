@@ -586,12 +586,10 @@ void vtkCamera::Elevation(double angle)
   double axis[3], newPosition[3];
   double *fp = this->FocalPoint;
   this->Transform->Identity();
-
 // snatch the axis from the view transform matrix
   axis[0] = -this->ViewTransform->GetMatrix()->GetElement(0,0);
   axis[1] = -this->ViewTransform->GetMatrix()->GetElement(0,1);
   axis[2] = -this->ViewTransform->GetMatrix()->GetElement(0,2);
-
 // translate the focal point to the origin,
 // rotate about axis,
 // translate back again

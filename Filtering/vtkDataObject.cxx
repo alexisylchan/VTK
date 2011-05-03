@@ -917,7 +917,7 @@ void vtkDataObject::ShallowCopy(vtkDataObject *src)
 {
   if (!src)
     {
-    vtkWarningMacro("Attempted to ShallowCopy from null.");
+   // vtkWarningMacro("Attempted to ShallowCopy from null.");
     return;
     }
 

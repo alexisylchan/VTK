@@ -32,6 +32,8 @@ vtkStandardNewMacro(vtkRibbonFilter);
 // not vary with scalar values, and the width factor is 2.0.
 vtkRibbonFilter::vtkRibbonFilter()
 {
+ //Alexis: Disable warnings
+  this->SetGlobalWarningDisplay(0);
   this->Width = 0.5;
   this->Angle = 0.0;
   this->VaryWidth = 0;

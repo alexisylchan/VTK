@@ -471,6 +471,13 @@ public:
   void SetSurface2Base( vtkMatrix4x4 *head );
   vtkMatrix4x4* GetSurface2Base();
 
+  //Alexis: Temp hack. 
+  double O2Screen;
+  double O2Right;
+  double O2Left;
+  double O2Top;
+  double O2Bottom;
+
 protected:
   vtkCamera();
   ~vtkCamera();
@@ -568,11 +575,11 @@ protected:
 
   double AsymLeft, AsymRight,  AsymBottom,  AsymTop;
   double EyePos[3];
-  double O2Screen;
+  /*double O2Screen;
   double O2Right;
   double O2Left;
   double O2Top;
-  double O2Bottom;
+  double O2Bottom;*/
   // temp
   vtkMatrix4x4 *eyePosMat;
   vtkMatrix4x4 *negEyePosMat;

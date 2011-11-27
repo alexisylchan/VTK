@@ -1102,6 +1102,10 @@ void vtkRenderer::ResetCamera(double bounds[6])
 
   // update the camera
   this->ActiveCamera->SetFocalPoint(center[0],center[1],center[2]);
+  if (this->ActiveCamera->GetHeadTracked())
+  {
+	  distance = distance/2.0;
+  } 
   this->ActiveCamera->SetPosition(center[0]+distance*vn[0],
                                   center[1]+distance*vn[1],
                                   center[2]+distance*vn[2]);

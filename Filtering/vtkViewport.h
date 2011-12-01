@@ -267,6 +267,7 @@ public:
   // @deprecated Replaced by vtkViewport::RemoveAllViewProps() as of VTK 5.0.
   VTK_LEGACY(void RemoveAllProps());
 
+  vtkPropCollection *Props;
 protected:
   // Create a vtkViewport with a black background, a white ambient light,
   // two-sided lighting turned on, a viewport of (0,0,1,1), and back face
@@ -307,7 +308,6 @@ protected:
   double PickY2;
   // End Ivars for picking
 
-  vtkPropCollection *Props;
   vtkActor2DCollection *Actors2D;
   vtkWindow *VTKWindow;
   double Background[3];

@@ -289,6 +289,7 @@ public:
   // Is the matrix for this actor identity
   vtkGetMacro(IsIdentity,int);
   
+  bool PhantomPicked;
 protected:
   vtkProp3D();
   ~vtkProp3D();

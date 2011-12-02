@@ -56,6 +56,7 @@ vtkProp3D::vtkProp3D()
 
   this->CachedProp3D = NULL;
   this->IsIdentity = 1;
+  this->PhantomPicked = false;
 }
 
 //----------------------------------------------------------------------------

@@ -288,6 +288,7 @@ public:
   // and move along its initial view plane normal (i.e., vector defined from
   // camera position to focal point) so that all of the actors can be seen.
   void ResetCamera();
+  void ResetCameraFrontOfMonitor();
 
   // Description:
   // Automatically set up the camera based on a specified bounding box
@@ -298,6 +299,7 @@ public:
   // the view plane is parallel to the view up axis, the view up axis will
   // be reset to one of the three coordinate axes.
   void ResetCamera(double bounds[6]);
+  void ResetCameraFrontOfMonitor(double bounds[6]);
 
   // Description:
   // Alternative version of ResetCamera(bounds[6]);

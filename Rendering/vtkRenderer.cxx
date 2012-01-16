@@ -988,6 +988,27 @@ void vtkRenderer::ResetCamera()
   this->InvokeEvent(vtkCommand::ResetCameraEvent,this);
 }
 
+void  vtkRenderer::ResetCameraFrontOfMonitor ()
+
+{
+  double      allBounds[6];
+
+  this->ComputeVisiblePropBounds( allBounds );
+
+  if (!vtkMath::AreBoundsInitialized(allBounds))
+    {
+    vtkDebugMacro( << "Cannot reset camera!" );
+    }
+  else
+    {
+    this->ResetCameraFrontOfMonitor(allBounds);
+    }
+
+  // Here to let parallel/distributed compositing intercept
+  // and do the right thing.
+  this->InvokeEvent(vtkCommand::ResetCameraEvent,this);
+}
+
 // Automatically set the clipping range of the camera based on the
 // visible actors
 void vtkRenderer::ResetCameraClippingRange()
@@ -1102,6 +1123,105 @@ void vtkRenderer::ResetCamera(double bounds[6])
 
   // update the camera
   this->ActiveCamera->SetFocalPoint(center[0],center[1],center[2]);
+  //Reinstate this code because resetcamera is the function called in pqdisplaypolicy
+  if (this->ActiveCamera->GetHeadTracked())
+  {
+	  distance = distance/2.0;
+  }  
+  this->ActiveCamera->SetPosition(center[0]+distance*vn[0],
+                                  center[1]+distance*vn[1],
+                                  center[2]+distance*vn[2]);
+
+  this->ResetCameraClippingRange( bounds );
+
+  // setup default parallel scale
+  this->ActiveCamera->SetParallelScale(parallelScale);
+}
+
+void vtkRenderer::ResetCameraFrontOfMonitor(double bounds[6])
+{
+  double center[3];
+  double distance;
+  double vn[3], *vup;
+
+  this->GetActiveCamera();
+  if ( this->ActiveCamera != NULL )
+    {
+    this->ActiveCamera->GetViewPlaneNormal(vn);
+    }
+  else
+    {
+    vtkErrorMacro(<< "Trying to reset non-existant camera");
+    return;
+    }
+
+  center[0] = (bounds[0] + bounds[1])/2.0;
+  center[1] = (bounds[2] + bounds[3])/2.0;
+  center[2] = (bounds[4] + bounds[5])/2.0;
+
+  double w1 = bounds[1] - bounds[0];
+  double w2 = bounds[3] - bounds[2];
+  double w3 = bounds[5] - bounds[4];
+  w1 *= w1;
+  w2 *= w2;
+  w3 *= w3;
+  double radius = w1 + w2 + w3;
+
+  // If we have just a single point, pick a radius of 1.0
+  radius = (radius==0)?(1.0):(radius);
+
+  // compute the radius of the enclosing sphere
+  radius = sqrt(radius)*0.5;
+
+  // default so that the bounding sphere fits within the view fustrum
+
+  // compute the distance from the intersection of the view frustum with the
+  // bounding sphere. Basically in 2D draw a circle representing the bounding
+  // sphere in 2D then draw a horizontal line going out from the center of
+  // the circle. That is the camera view. Then draw a line from the camera
+  // position to the point where it intersects the circle. (it will be tangent
+  // to the circle at this point, this is important, only go to the tangent
+  // point, do not draw all the way to the view plane). Then draw the radius
+  // from the tangent point to the center of the circle. You will note that
+  // this forms a right triangle with one side being the radius, another being
+  // the target distance for the camera, then just find the target dist using
+  // a sin.
+  double angle=vtkMath::RadiansFromDegrees(this->ActiveCamera->GetViewAngle());
+  double parallelScale=radius;
+
+  this->ComputeAspect();
+  double aspect[2];
+  this->GetAspect(aspect);
+
+  if(aspect[0]>=1.0) // horizontal window, deal with vertical angle|scale
+    {
+    if(this->ActiveCamera->GetUseHorizontalViewAngle())
+      {
+      angle=2.0*atan(tan(angle*0.5)/aspect[0]);
+      }
+    }
+  else // vertical window, deal with horizontal angle|scale
+    {
+    if(!this->ActiveCamera->GetUseHorizontalViewAngle())
+      {
+      angle=2.0*atan(tan(angle*0.5)*aspect[0]);
+      }
+
+    parallelScale=parallelScale/aspect[0];
+    }
+
+  distance =radius/sin(angle*0.5);
+
+  // check view-up vector against view plane normal
+  vup = this->ActiveCamera->GetViewUp();
+  if ( fabs(vtkMath::Dot(vup,vn)) > 0.999 )
+    {
+    vtkWarningMacro(<<"Resetting view-up since view plane normal is parallel");
+    this->ActiveCamera->SetViewUp(-vup[2], vup[0], vup[1]);
+    }
+
+  // update the camera
+  this->ActiveCamera->SetFocalPoint(center[0],center[1],center[2]);
   if (this->ActiveCamera->GetHeadTracked())
   {
 	  distance = distance/2.0;
@@ -1132,6 +1252,8 @@ void vtkRenderer::ResetCamera(double xmin, double xmax,
 
   this->ResetCamera(bounds);
 }
+
+ 
 
 // Reset the camera clipping range to include this entire bounding box
 void vtkRenderer::ResetCameraClippingRange( double bounds[6] )

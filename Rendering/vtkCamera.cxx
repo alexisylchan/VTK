@@ -919,7 +919,7 @@ void vtkCamera::ComputeProjAndViewParams()
   eyeSurface[3] = 0.0;
 
   this->Surface2Base->MultiplyPoint( eyeSurface, eyeSurface );
-
+  this->ScaleFactor = 1;
   double e2Screen = ( this->ScaleFactor * this->O2Screen ) + eyeSurface[2];
   double e2Right  = ( this->ScaleFactor * this->O2Right )  - eyeSurface[0];
   double e2Left   = ( this->ScaleFactor * this->O2Left )   + eyeSurface[0];

@@ -337,15 +337,19 @@ void vtkCamera::ComputeViewTransform()
 {
 // main view through the camera
   this->Transform->Identity();
-  if (this->UserViewTransform)
-    {
-    this->Transform->Concatenate(this->UserViewTransform);
-    }
+  //if (this->UserViewTransform)
+  //  {
+  //  this->Transform->Concatenate(this->UserViewTransform);
+  //  }
   if ( this->HeadTracked )
     {
     this->ViewTransform->Identity();
     this->ViewTransform->SetMatrix(this->HeadTrackedViewMat);
     this->Transform->SetupCamera(this->Position,this->FocalPoint,this->ViewUp);
+	if (this->UserViewTransform)
+    {
+    this->Transform->Concatenate(this->UserViewTransform);
+    }
     this->ViewTransform->Concatenate(this->Transform->GetMatrix());
     }
   else
@@ -919,7 +923,7 @@ void vtkCamera::ComputeProjAndViewParams()
   eyeSurface[3] = 0.0;
 
   this->Surface2Base->MultiplyPoint( eyeSurface, eyeSurface );
-  this->ScaleFactor = 1;
+  //this->ScaleFactor = 1;
   double e2Screen = ( this->ScaleFactor * this->O2Screen ) + eyeSurface[2];
   double e2Right  = ( this->ScaleFactor * this->O2Right )  - eyeSurface[0];
   double e2Left   = ( this->ScaleFactor * this->O2Left )   + eyeSurface[0];
